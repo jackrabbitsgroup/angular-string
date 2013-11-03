@@ -1,3 +1,9 @@
-<div ng-controller='HomeCtrl'>	
-	<!-- TODO: place directive call here -->
+<div ng-controller='HomeCtrl'>
+	<h3>parsedUrl</h3>
+	Try changing the url by typing in url GET parameters, i.e. '?p1=yes&p2=no'<br />
+	{{parsedUrl}}
+	
+	<h3>stripUrlParams</h3>
+	Try changing the url by typing in url GET parameters and this will strip out the 'p2' param, if it exists, i.e. '?p1=yes&p2=no'<br />
+	{{newUrl}}
 </div>
