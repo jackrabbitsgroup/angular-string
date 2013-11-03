@@ -19,7 +19,7 @@ config(['$routeProvider', '$locationProvider', '$compileProvider', function($rou
 	// var staticPath ='/';
 	var staticPath;
 	staticPath ='/angular-services/angular-string/';		//local
-	// staticPath ='/angular-string/';		//gh-pages
+	staticPath ='/angular-string/';		//gh-pages
 	var appPathRoute ='/';
 	var pagesPath =staticPath+'pages/';
 	
