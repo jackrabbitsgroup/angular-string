@@ -22,16 +22,18 @@ angular.module('jackrabbitsgroup.angular-string', [])
 		@param {Object} params
 			@param {String} url The full url to parse
 			@param {String} [rootPath =''] The part to strip off the beginning of the url (i.e. 'static/public/')
-		@return {Object} A parsed section of the current url, i.e. for a url of: 'http://localhost/static/public/home?p1=yes&p2=no'
-			@param {String} page The current url WITHOUT url GET params and WITHOUT the root path, i.e. 'home'
+		@return {Object} A parsed section of the current url, i.e. for a url of: 'http://localhost/static/public/home?p1=yes&p2=no#hash1=h1&hash2=h2'
+			@param {String} page The current url WITHOUT url GET params and WITHOUT hash params and WITHOUT the root path, i.e. 'home'
 			@param {String} queryParams The GET params, i.e. 'p1=yes&p2=no'
 			@param {Object} queryParamsObj An object version of the GET params, i.e. {p1:'yes', p2:'no'}
+			@param {String} hashParams The hash params, i.e. 'hash1=h1&hash2=h2'
+			@param {Object} hashParamsObj An object version of the hash params, i.e. {hash1:'h1', hash2:'h2'}
 		
 		@usage
-			var parsedUrl =jrgString.parseUrl({url:'http://localhost/static/public/home?p1=yes&p2=no', rootPath:'static/public/'});
+			var parsedUrl =jrgString.parseUrl({url:'http://localhost/static/public/home?p1=yes&p2=no#hash1=h1&hash2=h2', rootPath:'static/public/'});
 		*/
 		parseUrl: function(params) {
-			var ret ={page: '', queryParams: ''};
+			var ret ={page: '', queryParams: '', hashParams: ''};
 			var defaults ={rootPath: ''};
 			var xx;
 			for(xx in defaults) {
@@ -50,11 +52,21 @@ angular.module('jackrabbitsgroup.angular-string', [])
 			
 			var pos1 =curUrl.indexOf(appPath);
 			var curPage =curUrl.slice((pos1+appPath.length), curUrl.length);
-			//handle non HTML5 history by stripping off leading '#/'
+			//handle Angular non HTML5 history by stripping off leading '#/'
 			var posHash =curPage.indexOf("#/");
 			if(posHash >-1) {
 				curPage =curPage.slice((posHash+2), curPage.length);
 			}
+			
+			//hash url params - this assumes '#' is AFTER '?', which is why we do it FIRST
+			posHash =curPage.indexOf("#");
+			var hashParams ='';
+			if(posHash >-1) {
+				hashParams =curPage.slice((posHash+1), curPage.length);
+				curPage =curPage.slice(0, posHash);
+			}
+			
+			//query / GET url params
 			var posQuery =curPage.indexOf("?");
 			var queryParams ='';
 			if(posQuery >-1) {
@@ -65,13 +77,15 @@ angular.module('jackrabbitsgroup.angular-string', [])
 			ret.page =curPage;
 			ret.queryParams =queryParams;
 			ret.queryParamsObj =this.parseUrlParams(queryParams, {});
+			ret.hashParams =hashParams;
+			ret.hashParamsObj =this.parseUrlParams(hashParams, {});
 			return ret;
 		},
 		
 		/**
-		Turns a query string (i.e. '?yes=no&maybe=so') into an object for easier reference
+		Turns a query (or hash) string (i.e. '?yes=no&maybe=so') into an object for easier reference
 		@toc 1.5.
-		@param {String} urlParams The query string (i.e. '?yes=no&maybe=so')
+		@param {String} urlParams The query string (i.e. '?yes=no&maybe=so' or '#yes=no&maybe=so')
 		@param {Object} [params]
 		@return {Object} Key-value pairs for each parameter; i.e. {'yes':'no', 'maybe':'so'}
 		
@@ -83,6 +97,12 @@ angular.module('jackrabbitsgroup.angular-string', [])
 			var questionMark =urlParams.indexOf("?");
 			if(questionMark >-1) {
 				urlParams =urlParams.slice((questionMark+1), urlParams.length);
+			}
+			
+			//strip out leading hash, if present
+			var hashTag =urlParams.indexOf("#");
+			if(hashTag >-1) {
+				urlParams =urlParams.slice((hashTag+1), urlParams.length);
 			}
 			
 			var urlParamsObj ={};
